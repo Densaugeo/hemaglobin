@@ -1,2 +1,2 @@
-# hemaglobin
+# hemoglobin
 Small bioinformatics library for Rust
