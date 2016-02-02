@@ -10,6 +10,26 @@ use std::io::Read;
 #[derive(Eq, PartialEq)]
 pub enum Base { A, T, C, G }
 
+impl Base {
+  /// Complement of a DNA base
+  ///
+  /// # Examples
+  /// ```
+  /// let adenine = hemoglobin::Base::A;
+  /// let thyamine = adenine.complement();
+  ///
+  /// assert_eq!(thyamine, hemoglobin::Base::T);
+  /// ```
+  pub fn complement(&self) -> Self {
+    match *self {
+      Base::A => Base::T,
+      Base::T => Base::A,
+      Base::C => Base::G,
+      Base::G => Base::C
+    }
+  }
+}
+
 impl std::fmt::Display for Base {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     f.write_str(match *self {
@@ -75,6 +95,25 @@ impl Sequence {
     let result = Sequence::new(contents);
     return Ok(result);
   }
+  
+  /// Reverse sequence and take its complement
+  ///
+  /// # Examples
+  /// ```
+  /// let a_sequence = hemoglobin::Sequence::new("TACGATCTAGTCTAGGATC");
+  /// let reverse_complement = a_sequence.reverse_complement();
+  ///
+  /// assert_eq!(reverse_complement, hemoglobin::Sequence::new("GATCCTAGACTAGATCGTA"));
+  /// ```
+  pub fn reverse_complement(&self) -> Self {
+    let mut result: Vec<Base> = Vec::new();
+    
+    for i in (0..self.0.len()).rev() {
+      result.push(self.0[i].complement());
+    }
+    
+    return Sequence(result);
+  }
 }
 
 /// Find all appearances of a given kmer in a sequence. Must specify if
@@ -117,6 +156,21 @@ pub fn find_kmers(sequence: &Sequence, kmer: &Sequence, circular: bool) -> Vec<u
 #[cfg(test)]
 mod tests {
   use super::*;
+  
+  #[test]
+  fn base_complements() {
+    assert_eq!(Base::A.complement(), Base::T);
+    assert_eq!(Base::T.complement(), Base::A);
+    assert_eq!(Base::C.complement(), Base::G);
+    assert_eq!(Base::G.complement(), Base::C);
+  }
+  
+  #[test]
+  fn sequence_reverse_complement() {
+    let a_sequence = Sequence::new("TACGATCTAGTCTAGGATC");
+    
+    assert_eq!(a_sequence.reverse_complement(), Sequence::new("GATCCTAGACTAGATCGTA"));
+  }
   
   #[test]
   fn find_kmers_linear() {
