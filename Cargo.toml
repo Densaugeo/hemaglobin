@@ -1,0 +1,12 @@
+[package]
+name = "hemoglobin"
+version = "0.1.0"
+authors = ["Densaugeo <you@example.com>"]
+license = "LGPL-2.0+"
+readme = "README.md"
+repository = "https://github.com/Densaugeo/hemoglobin"
+homepage = "https://github.com/Densaugeo/hemoglobin"
+description = """
+Small bioinformatics library for Rust
+"""
+
