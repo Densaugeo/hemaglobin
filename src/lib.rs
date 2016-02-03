@@ -8,7 +8,7 @@ use std::io::Read;
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 #[derive(Eq, PartialEq)]
-pub enum Base { A, T, C, G }
+pub enum Base { A = 0, C = 1, G = 2, T = 3 }
 
 impl Base {
   /// Complement of a DNA base
@@ -26,6 +26,24 @@ impl Base {
       Base::T => Base::A,
       Base::C => Base::G,
       Base::G => Base::C
+    }
+  }
+  
+  /// Convert a u64 number to a Base
+  ///
+  /// # Examples
+  /// ```
+  /// let a_base = hemoglobin::Base::from_u64(1).unwrap();
+  ///
+  /// assert_eq!(a_base, hemoglobin::Base::C);
+  /// ```
+  pub fn from_u64(num: u64) -> Option<Self> {
+    match num {
+      0 => Some(Base::A),
+      1 => Some(Base::C),
+      2 => Some(Base::G),
+      3 => Some(Base::T),
+      _ => None
     }
   }
 }
@@ -96,6 +114,26 @@ impl Sequence {
     return Ok(result);
   }
   
+  /// Convert a bitfield in a u64 to a Sequence
+  ///
+  /// # Examples
+  /// ```
+  /// let a_sequence = hemoglobin::Sequence::from_u64(0xBA5E500000000000, 10);
+  ///
+  /// assert_eq!(a_sequence, hemoglobin::Sequence::new("GTGGCCTGCC"));
+  /// ```
+  pub fn from_u64(num: u64, length: u8) -> Self {
+    let mut result: Vec<Base> = Vec::new();
+    
+    let end = std::cmp::min(length, 32);
+    
+    for i in 0..end {
+      result.push(Base::from_u64(num << 2*i >> 62).unwrap()); // Result guaranteed to exist for numbers <= 3
+    }
+    
+    return Sequence(result);
+  }
+  
   /// Reverse sequence and take its complement
   ///
   /// # Examples
@@ -113,6 +151,29 @@ impl Sequence {
     }
     
     return Sequence(result);
+  }
+  
+  /// Retrieve a subsequence, encoded as a bitfield in a u64. Limited to 32 bases
+  ///
+  /// # Examples
+  /// ```
+  /// let a_sequence = hemoglobin::Sequence::new("TACGATCTAGTCTAGGATC");
+  /// let numbers = a_sequence.subsequence_as_u64(4, 7).unwrap();
+  ///
+  /// assert_eq!(numbers, 0x372C000000000000);
+  /// ```
+  pub fn subsequence_as_u64(&self, start: usize, length: usize) -> Option<u64> {
+    if length > 32 || start + length > self.0.len() {
+      return None;
+    }
+    
+    let mut result: u64 = 0;
+    
+    for i in 0..length {
+      result = result | ((self.0[start + i] as u64) << (62 - 2*i));
+    }
+    
+    return Some(result);
   }
 }
 
@@ -166,10 +227,35 @@ mod tests {
   }
   
   #[test]
+  fn base_from_u64() {
+    assert_eq!(Base::from_u64(0), Some(Base::A));
+    assert_eq!(Base::from_u64(1), Some(Base::C));
+    assert_eq!(Base::from_u64(2), Some(Base::G));
+    assert_eq!(Base::from_u64(3), Some(Base::T));
+    assert_eq!(Base::from_u64(4), None);
+  }
+  
+  #[test]
   fn sequence_reverse_complement() {
     let a_sequence = Sequence::new("TACGATCTAGTCTAGGATC");
     
     assert_eq!(a_sequence.reverse_complement(), Sequence::new("GATCCTAGACTAGATCGTA"));
+  }
+  
+  #[test]
+  fn sequence_from_u64() {
+    assert_eq!(Sequence::from_u64(0xBA5E500000000000, 10), Sequence::new("GTGGCCTGCC"));
+    assert_eq!(Sequence::from_u64(0xBA5E500000000000, 7 ), Sequence::new("GTGGCCT"));
+    assert_eq!(Sequence::from_u64(0xBA5E500000000000, 12), Sequence::new("GTGGCCTGCCAA"));
+    assert_eq!(Sequence::from_u64(0xBA5E500000000000, 99), Sequence::new("GTGGCCTGCCAAAAAAAAAAAAAAAAAAAAAA"));
+  }
+  
+  #[test]
+  fn subsequence_as_u64() {
+    let a_sequence = Sequence::new("TACGATCTAGT");
+    assert_eq!(a_sequence.subsequence_as_u64(4, 7), Some(0x372C000000000000));
+    assert_eq!(a_sequence.subsequence_as_u64(4, 0), Some(0));
+    assert_eq!(a_sequence.subsequence_as_u64(4, 8), None);
   }
   
   #[test]
