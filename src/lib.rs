@@ -114,7 +114,7 @@ impl Sequence {
   /// # Examples
   /// ```
   /// let path = std::path::Path::new("./tests/test_sequence");
-  /// let a_sequence = hemoglobin::Sequence::from_file(path);
+  /// let a_sequence = hemoglobin::Sequence::from_file(path).unwrap();
   /// ```
   pub fn from_file<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Self> {
     let mut file = try!(File::open(path));
