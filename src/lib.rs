@@ -59,6 +59,17 @@ impl std::fmt::Display for Base {
   }
 }
 
+#[derive(Debug)]
+#[derive(Copy, Clone)]
+#[derive(Eq, PartialEq)]
+#[allow(non_snake_case)] // A, C, G, T should be capitalized
+pub struct BaseCount {
+  pub A: u64,
+  pub C: u64,
+  pub G: u64,
+  pub T: u64
+}
+
 /// Represents a sequence of bases
 #[derive(Debug)]
 #[derive(Clone)]
@@ -155,6 +166,31 @@ impl Sequence {
     }
     
     return Some(result);
+  }
+  
+  /// Count bases in a sequence
+  ///
+  /// # Examples
+  /// ```
+  /// let a_sequence = hemoglobin::Sequence::new("TACGATCTAGTCTAGGATC");
+  /// let bases = a_sequence.count_bases();
+  /// let adenines = bases.A;
+  ///
+  /// assert_eq!(adenines, 5);
+  /// ```
+  pub fn count_bases(&self) -> BaseCount {
+    let mut result = BaseCount { A: 0, C: 0, G: 0, T: 0 };
+    
+    for base in &self.0 {
+      match *base {
+        Base::A => result.A += 1,
+        Base::C => result.C += 1,
+        Base::G => result.G += 1,
+        Base::T => result.T += 1
+      }
+    }
+    
+    return result;
   }
   
   /// Reverse sequence and take its complement
@@ -256,6 +292,12 @@ mod tests {
     assert_eq!(a_sequence.subsequence_as_u64(4, 7), Some(0x372C000000000000));
     assert_eq!(a_sequence.subsequence_as_u64(4, 0), Some(0));
     assert_eq!(a_sequence.subsequence_as_u64(4, 8), None);
+  }
+  
+  #[test]
+  fn count_bases() {
+    assert_eq!(Sequence::new("").count_bases(), BaseCount { A: 0, C: 0, G: 0, T: 0 });
+    assert_eq!(Sequence::new("TACGATCTAGTCTAGGATC").count_bases(), BaseCount { A: 5, C: 4, G: 4, T: 6 });
   }
   
   #[test]
