@@ -272,13 +272,6 @@ mod tests {
   }
   
   #[test]
-  fn sequence_reverse_complement() {
-    let a_sequence = Sequence::new("TACGATCTAGTCTAGGATC");
-    
-    assert_eq!(a_sequence.reverse_complement(), Sequence::new("GATCCTAGACTAGATCGTA"));
-  }
-  
-  #[test]
   fn sequence_from_u64() {
     assert_eq!(Sequence::from_u64(0xBA5E500000000000, 10), Sequence::new("GTGGCCTGCC"));
     assert_eq!(Sequence::from_u64(0xBA5E500000000000, 7 ), Sequence::new("GTGGCCT"));
@@ -298,6 +291,13 @@ mod tests {
   fn count_bases() {
     assert_eq!(Sequence::new("").count_bases(), BaseCount { A: 0, C: 0, G: 0, T: 0 });
     assert_eq!(Sequence::new("TACGATCTAGTCTAGGATC").count_bases(), BaseCount { A: 5, C: 4, G: 4, T: 6 });
+  }
+  
+  #[test]
+  fn sequence_reverse_complement() {
+    let a_sequence = Sequence::new("TACGATCTAGTCTAGGATC");
+    
+    assert_eq!(a_sequence.reverse_complement(), Sequence::new("GATCCTAGACTAGATCGTA"));
   }
   
   #[test]
