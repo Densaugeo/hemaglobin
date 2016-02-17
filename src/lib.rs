@@ -134,25 +134,6 @@ impl Sequence {
     return Sequence(result);
   }
   
-  /// Reverse sequence and take its complement
-  ///
-  /// # Examples
-  /// ```
-  /// let a_sequence = hemoglobin::Sequence::new("TACGATCTAGTCTAGGATC");
-  /// let reverse_complement = a_sequence.reverse_complement();
-  ///
-  /// assert_eq!(reverse_complement, hemoglobin::Sequence::new("GATCCTAGACTAGATCGTA"));
-  /// ```
-  pub fn reverse_complement(&self) -> Self {
-    let mut result: Vec<Base> = Vec::new();
-    
-    for i in (0..self.0.len()).rev() {
-      result.push(self.0[i].complement());
-    }
-    
-    return Sequence(result);
-  }
-  
   /// Retrieve a subsequence, encoded as a bitfield in a u64. Limited to 32 bases
   ///
   /// # Examples
@@ -174,6 +155,25 @@ impl Sequence {
     }
     
     return Some(result);
+  }
+  
+  /// Reverse sequence and take its complement
+  ///
+  /// # Examples
+  /// ```
+  /// let a_sequence = hemoglobin::Sequence::new("TACGATCTAGTCTAGGATC");
+  /// let reverse_complement = a_sequence.reverse_complement();
+  ///
+  /// assert_eq!(reverse_complement, hemoglobin::Sequence::new("GATCCTAGACTAGATCGTA"));
+  /// ```
+  pub fn reverse_complement(&self) -> Self {
+    let mut result: Vec<Base> = Vec::new();
+    
+    for i in (0..self.0.len()).rev() {
+      result.push(self.0[i].complement());
+    }
+    
+    return Sequence(result);
   }
 }
 
